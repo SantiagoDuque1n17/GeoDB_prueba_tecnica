@@ -1,20 +1,44 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[76]:
+# In[1]:
 
 
 import base58
 import datetime
+
+import matplotlib.pyplot as plt
+import numpy as np
+
 from random import choice
 from random import randint
 from string import ascii_lowercase
 from dateutil.parser import parse
 
 
-# In[77]:
+# In[ ]:
 
 
+# Código para la prueba técnica de GeoDB
+# Santiago Duque Porras
+# Diciembre 2020
+
+
+# In[2]:
+
+
+"""
+Clase para representar los Tickets. 
+
+Parámetros:
+
+id_ticket (string en base58 de longitud 20)
+id_evento (string en base58 de longitud 10)
+numero_de_entrada (integer entre 1 y 1.000.000)
+estado (string/char 'v' o 'u')
+
+No tiene funciones propias, sólo sirve para representar los Tickets
+"""
 class Ticket:
     def __init__(self, id_ticket, id_evento, numero_de_entrada, estado):
         
@@ -61,8 +85,10 @@ class Ticket:
     
 
 
-# In[78]:
+# In[3]:
 
+
+#Código de testeo para la clase Ticket
 
 ticket1 = Ticket("1111111111aaaaaaaaaa", "1111111111", 100, 'v')
 print(ticket1.id_ticket)
@@ -71,9 +97,21 @@ print(ticket1.numero_de_entrada)
 print(ticket1.estado)
 
 
-# In[79]:
+# In[4]:
 
 
+"""
+Clase para representar los Eventos. 
+
+Parámetros:
+
+id_evento (string en base58 de longitud 10)
+id_recinto (string en base58 de longitud 5)
+descripcion (string)
+fecha (formato 'date')
+
+No tiene funciones propias, sólo sirve para representar los Eventos
+"""
 class Evento:
     def __init__(self, id_evento, id_recinto, descripcion, fecha):
             
@@ -110,8 +148,10 @@ class Evento:
         self.fecha = fecha
 
 
-# In[80]:
+# In[5]:
 
+
+#Código de Testeo para la clase Evento
 
 evento1 = Evento("1111111111", "aaaaa", "hola hola hola", datetime.date.today())
 print()
@@ -121,8 +161,21 @@ print(evento1.descripcion)
 print(evento1.fecha)
 
 
-# In[81]:
+# In[6]:
 
+
+"""
+Clase para representar los Recintos. 
+
+Parámetros:
+
+id_recinto (string en base58 de longitud 5)
+latitud (float)
+longitud (float)
+
+No tiene funciones propias, sólo sirve para representar los Recintos
+
+"""
 
 class Recinto:
     def __init__(self, id_recinto, latitud, longitud):
@@ -154,8 +207,10 @@ class Recinto:
         
 
 
-# In[82]:
+# In[7]:
 
+
+#Código de testeo para los Recintos
 
 recinto1 = Recinto('11111', 58.123123, 78.97328273)
 
@@ -164,18 +219,24 @@ print(recinto1.latitud)
 print(recinto1.longitud)
 
 
-# In[93]:
+# In[20]:
 
 
 #RETO 1
 
+"""
+Función para generar n número de tickets en función de los eventos disponibles.
+
+"""
 def generar_tickets(n_tickets, lista_eventos):
     lista_tickets = []
     
+    #Generar una lista con todas las IDs de los eventos
     lista_id_eventos = []
     for evento in lista_eventos:
         lista_id_eventos.append(evento.id_evento)
         
+    #Contador del número de entradda
     numero_actual = 1
     
     #Ticket: id_ticket, id_evento, numero_de_entrada, estado
@@ -183,15 +244,17 @@ def generar_tickets(n_tickets, lista_eventos):
         
         id_ticket = generar_id_ticket_aleatoria()
         
+        #El número del evento es n módulo el número total de eventos que hay
+        #Es decir, se asignarán tickets secuencialmente a los eventos y, cuando llegue al final
+        #de la lista de eventos, empezará por el principio.
         n_evento = n%len(lista_id_eventos)
         id_evento = lista_id_eventos[n_evento]
         
-        #Para el número de entrada entiendo que es un número único para cada evento 
-        #e.g.: puede (debe) haber varios tickets con el mismo número, porque es secuencial en función del evento
-        #De momento voy a implementarlo para que sea en función del ticket y no del evento, igual lo cambio más tarde
         numero_de_entrada = numero_actual
         numero_actual = numero_actual+1
         
+        #Lo mismo con el estado de los tickets. Van alterando entre válido y usado. 
+        #Se podrían generar de otras maneras, quizás con una probabilidad.
         lista_estados = ['v', 'u']
         estado = lista_estados[n%2]
         
@@ -199,21 +262,27 @@ def generar_tickets(n_tickets, lista_eventos):
         
     for n in range(len(lista_tickets)):
         print("______________________________________")
-        print("Ticket número ", n)
+        print("Ticket número ", n+1)
         print("********************")
         print("Id del ticket : ", lista_tickets[n].id_ticket)
         print("Id del evento : ", lista_tickets[n].id_evento)
         print("Número de entrada: ", lista_tickets[n].numero_de_entrada)
         print("Estado del ticket: ", lista_tickets[n].estado)
         
+    return lista_tickets
+        
 #Generación de IDs a partir del módulo ASCII. La manera de hacerlo compatible con base58 es generándolas en 
-#minúsculas para que no haya 'O's mayúsculas y cambiando la 'L' minúscula por una mayúscula, no sé si es un poco stinky.
+#minúsculas para que no haya 'O's mayúsculas y cambiando la 'L' minúscula por una mayúscula.
 def generar_id_ticket_aleatoria():
     id = ''.join(choice(ascii_lowercase) for i in range(20))
     id = id.replace('l', 'L')
     return id
     
     
+"""
+Función para generar n número de eventos en función de los recintos disponibles.
+
+"""
 def generar_eventos(n_eventos, lista_recintos):
     lista_eventos = []
     
@@ -238,20 +307,130 @@ def generar_eventos(n_eventos, lista_recintos):
     return lista_eventos
         
     
+"""
+Función para generar recintos. Se podría parameterizar, pero por brevedad he generado manualmente dos recintos específicos.
+
+"""
 def generar_recintos():
     #las coordenadas son de Madrid y Berlín, respectivamente (ciudades conocidas por su gran ambiente nocturno :D)
-    lista_recintos = [Recinto('MMMMM', 40.416729, -3.703339), Recinto('BBBBB', 52.520008, 13.404954)]
+    lista_recintos = [Recinto('MADRD', 40.416729, -3.703339), Recinto('BERLN', 52.520008, 13.404954)]
     return lista_recintos
 
 
-# In[94]:
+# In[21]:
 
 
-generar_tickets(10, generar_eventos(7, generar_recintos()))
+#Código de testeo para generar los recintos, eventos y tickets
+
+recintos = generar_recintos()
+eventos = generar_eventos(7, recintos)
+tickets = generar_tickets(100, eventos)
 
 
-# In[ ]:
+# In[22]:
 
 
+"""
+Clase que recopila información sobre un lote específico de recintos, eventos y tickets.
 
+"""
+
+class InformacionEvento:
+        
+    def __init__(self, lista_tickets, lista_eventos, lista_recintos):
+        self.lista_tickets = lista_tickets
+        self.lista_eventos = lista_eventos
+        self.lista_recintos = lista_recintos
+       
+    #RETO 2
+    """
+    Función para extraer el porcentaje de asistencia de un evento específico
+    
+    """
+    def extraer_asistencia_por_evento(self, id_del_evento):
+        evento_elegido = None
+        
+        for e in self.lista_eventos:
+            if (e.id_evento == id_del_evento): #Seleccionando el evento específico en base a su id
+                evento_elegido = e
+         
+        lista_tickets_evento = []
+        
+        for t in self.lista_tickets:
+            if (t.id_evento == evento_elegido.id_evento): #Llenando una lista con los estados de todos 
+                lista_tickets_evento.append(t.estado)     #los tickets de ese evento
+        
+        n_valido = 0
+        n_usado = 0
+        for e in lista_tickets_evento:
+            if (e=='v'):
+                n_valido = n_valido+1   #Contando el número de tickets válidos y usados, respectivamente
+            elif (e=='u'):
+                n_usado = n_usado+1
+                
+        print ("Información de tickets para el evento %s en el recinto %s :" 
+               % (evento_elegido.descripcion, evento_elegido.id_recinto))
+        print ("Número de tickets válidos: ", n_valido)
+        print ("Número de tickets usados: ", n_usado)
+            
+        return n_valido, n_usado
+    
+    #RETO 3
+    """
+    Función para extraer el nivel de asistencia en cada evento y recinto
+    
+    """
+    def extraer_asistencia_total(self, lista_eventos):
+        lista_validos = []
+        lista_usados = []
+        
+        for evento in lista_eventos:
+            valido, usado = self.extraer_asistencia_por_evento(evento.id_evento)
+            lista_validos.append(valido)
+            lista_usados.append(usado)
+        
+        return lista_validos, lista_usados
+        
+
+
+# In[23]:
+
+
+#Código de testeo para la extracción de datos específica
+
+info_eventos = InformacionEvento(tickets, eventos, recintos)
+n_validos, n_usados = info_eventos.extraer_asistencia_por_recinto('1111111111')
+
+
+# In[24]:
+
+
+#Código de testeo para la extracción de datos general
+
+validos, usados = info_eventos.extraer_asistencia_total(eventos)
+
+
+# In[50]:
+
+
+#Visualización de datos para el Reto 3
+
+data = [validos, usados]
+X = np.arange(len(eventos))
+fig = plt.figure()
+ax = fig.add_axes([0,0,1,1])
+ax.bar(X + 0.00, data[0], color = 'b', width = 0.3)
+ax.bar(X + 0.25, data[1], color = 'r', width = 0.3, align='center')
+
+lista_descripcion = []
+for e in eventos:
+    nombre = e.descripcion + "\n en recinto \n" + e.id_recinto
+    lista_descripcion.append(nombre)
+        
+x = lista_descripcion
+xi = list(range(len(x)))
+plt.xticks(xi, x)
+plt.setp(ax.get_xticklabels(), fontsize=10, rotation=45) # Etiquetas del eje x
+
+ax.legend(labels=['Tickets válidos', 'Tickets usados']) # Leyenda
 
