@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[35]:
 
 
 import base58
@@ -12,19 +12,29 @@ import numpy as np
 
 from random import choice
 from random import randint
+from random import uniform
 from string import ascii_lowercase
 from dateutil.parser import parse
 
 
-# In[ ]:
+# In[36]:
 
 
 # Código para la prueba técnica de GeoDB
 # Santiago Duque Porras
 # Diciembre 2020
 
+# He elegido Python para esta prueba, por una parte, por su gran utilidad como lenguaje de procesamiento de datos. 
+# Por otra parte, aunque estoy más familiarizado con Java, me ha parecido ésta una buena oportunidad para seguir
+# practicando con Python - ésta vez en el entorno del Big Data, más allá de mi experiencia con librerías de
+# inteligencia artificial.
 
-# In[2]:
+# En otra ocasión habría separado las distintas clases en distintos archivos. I.e.: Un archivo para cada clase,
+# otro archivo para los testeos y un Main para la ejecución general. No obstante, Jupyter me ha parecido una
+# manera apropiada de desarrollarlo y presentarlo, pues tiene gran facilidad de ejecución y visualización secuencial.
+
+
+# In[37]:
 
 
 """
@@ -85,7 +95,7 @@ class Ticket:
     
 
 
-# In[3]:
+# In[38]:
 
 
 #Código de testeo para la clase Ticket
@@ -97,7 +107,7 @@ print(ticket1.numero_de_entrada)
 print(ticket1.estado)
 
 
-# In[4]:
+# In[39]:
 
 
 """
@@ -148,7 +158,7 @@ class Evento:
         self.fecha = fecha
 
 
-# In[5]:
+# In[40]:
 
 
 #Código de Testeo para la clase Evento
@@ -161,7 +171,7 @@ print(evento1.descripcion)
 print(evento1.fecha)
 
 
-# In[6]:
+# In[41]:
 
 
 """
@@ -207,7 +217,7 @@ class Recinto:
         
 
 
-# In[7]:
+# In[42]:
 
 
 #Código de testeo para los Recintos
@@ -219,7 +229,7 @@ print(recinto1.latitud)
 print(recinto1.longitud)
 
 
-# In[20]:
+# In[50]:
 
 
 #RETO 1
@@ -253,10 +263,14 @@ def generar_tickets(n_tickets, lista_eventos):
         numero_de_entrada = numero_actual
         numero_actual = numero_actual+1
         
-        #Lo mismo con el estado de los tickets. Van alterando entre válido y usado. 
-        #Se podrían generar de otras maneras, quizás con una probabilidad.
-        lista_estados = ['v', 'u']
-        estado = lista_estados[n%2]
+        #El estado de los Tickets se genera arbitrariamente en base a una probabilidad, para
+        #producir una distribución de datos algo más realista.
+        rand = uniform(0, 1)
+        estado = None
+        if (rand > 0.35):
+            estado = 'v'
+        else:
+            estado = 'u'
         
         lista_tickets.append(Ticket(id_ticket, id_evento, numero_de_entrada, estado))
         
@@ -317,7 +331,7 @@ def generar_recintos():
     return lista_recintos
 
 
-# In[21]:
+# In[51]:
 
 
 #Código de testeo para generar los recintos, eventos y tickets
@@ -327,7 +341,7 @@ eventos = generar_eventos(7, recintos)
 tickets = generar_tickets(100, eventos)
 
 
-# In[22]:
+# In[52]:
 
 
 """
@@ -393,16 +407,16 @@ class InformacionEvento:
         
 
 
-# In[23]:
+# In[53]:
 
 
 #Código de testeo para la extracción de datos específica
 
 info_eventos = InformacionEvento(tickets, eventos, recintos)
-n_validos, n_usados = info_eventos.extraer_asistencia_por_recinto('1111111111')
+n_validos, n_usados = info_eventos.extraer_asistencia_por_evento('1111111111')
 
 
-# In[24]:
+# In[54]:
 
 
 #Código de testeo para la extracción de datos general
@@ -410,7 +424,7 @@ n_validos, n_usados = info_eventos.extraer_asistencia_por_recinto('1111111111')
 validos, usados = info_eventos.extraer_asistencia_total(eventos)
 
 
-# In[50]:
+# In[55]:
 
 
 #Visualización de datos para el Reto 3
@@ -433,4 +447,3 @@ plt.xticks(xi, x)
 plt.setp(ax.get_xticklabels(), fontsize=10, rotation=45) # Etiquetas del eje x
 
 ax.legend(labels=['Tickets válidos', 'Tickets usados']) # Leyenda
-
